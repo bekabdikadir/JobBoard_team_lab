@@ -1,0 +1,41 @@
+# Build results
+bin/
+obj/
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.suo
+
+# User-specific files
+*.rsuser
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# ASP.NET Core local settings
+appsettings.Local.json
+
+# Environment variables / secrets
+.env
+.env.*
+
+# Publish output
+publish/
+wwwroot/dist/
+
+# Test results
+TestResults/
+
+# Temporary files
+*.tmp
+*.temp
