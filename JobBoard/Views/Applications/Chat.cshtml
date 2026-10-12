@@ -1,0 +1,61 @@
+@model ChatViewModel
+@{
+    var application = Model.Application;
+    ViewData["Title"] = "Переписка";
+}
+<div class="card shadow-sm mb-3">
+    <div class="card-body d-flex flex-wrap justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-1">
+                <a asp-controller="Vacancies" asp-action="Details" asp-route-id="@application.VacancyId" class="text-decoration-none">@application.Vacancy?.Title</a>
+            </h5>
+            <div class="small text-muted">Компания: @application.Vacancy?.Employer?.DisplayName</div>
+            <div class="small">
+                Прикреплённое резюме:
+                <a asp-controller="Resumes" asp-action="Details" asp-route-id="@application.ResumeId">@application.Resume?.Title</a>
+            </div>
+            @if (!Model.IsSeeker)
+            {
+                <div class="small">
+                    Соискатель:
+                    <a asp-controller="Profiles" asp-action="Seeker" asp-route-id="@application.SeekerId">@application.Seeker?.DisplayName</a>
+                </div>
+            }
+        </div>
+        @if (Model.IsSeeker)
+        {
+            <a class="btn btn-outline-secondary" asp-controller="Seeker" asp-action="Applications">К моим откликам</a>
+        }
+    </div>
+</div>
+
+<div class="chat-box mb-3" id="chatBox">
+    @if (!Model.Messages.Any())
+    {
+        <div class="text-muted text-center">Сообщений пока нет. Напишите первое сообщение.</div>
+    }
+    @foreach (var message in Model.Messages)
+    {
+        var mine = message.SenderId == Model.CurrentUserId;
+        <div class="chat-msg @(mine ? "mine" : "theirs")">
+            <small>@(mine ? "Вы" : message.Sender?.DisplayName) · @message.SentAt.ToString("dd.MM.yyyy HH:mm")</small>
+            <div class="pre-wrap">@message.Text</div>
+        </div>
+    }
+</div>
+
+<form asp-action="SendMessage" asp-route-id="@application.Id" method="post">
+    <div class="input-group">
+        <textarea name="text" class="form-control" rows="2" maxlength="4000" placeholder="Введите сообщение" required></textarea>
+        <button type="submit" class="btn btn-primary">Отправить</button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(function () {
+            var box = document.getElementById('chatBox');
+            box.scrollTop = box.scrollHeight;
+        });
+    </script>
+}

@@ -1,0 +1,36 @@
+@model SeekerProfileViewModel
+@{
+    ViewData["Title"] = Model.User.DisplayName;
+}
+<div class="card shadow-sm mb-4">
+    <div class="card-body d-flex align-items-center">
+        <img src="@Model.User.AvatarUrl" class="avatar avatar-lg me-4" alt="" />
+        <div>
+            <h3 class="mb-1">@Model.User.DisplayName</h3>
+            <div class="text-muted">Email: @Model.User.Email</div>
+            <div class="text-muted">Телефон: @Model.User.PhoneNumber</div>
+        </div>
+    </div>
+</div>
+
+<h4 class="mb-3">Опубликованные резюме</h4>
+@if (!Model.Resumes.Any())
+{
+    <div class="alert alert-info">У соискателя нет опубликованных резюме.</div>
+}
+else
+{
+    <div class="list-group shadow-sm">
+        @foreach (var resume in Model.Resumes)
+        {
+            <a class="list-group-item list-group-item-action" asp-controller="Resumes" asp-action="Details" asp-route-id="@resume.Id">
+                <div class="d-flex justify-content-between">
+                    <h5 class="mb-1">@resume.Title</h5>
+                    <small class="text-muted">@resume.UpdatedAt.ToString("dd.MM.yyyy")</small>
+                </div>
+                <div class="text-muted small">@resume.Category?.Name</div>
+            </a>
+        }
+    </div>
+}
+<a class="btn btn-outline-secondary mt-3" asp-controller="Resumes" asp-action="Catalog">К каталогу резюме</a>

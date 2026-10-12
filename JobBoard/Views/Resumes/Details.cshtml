@@ -1,0 +1,186 @@
+@model Resume
+@{
+    ViewData["Title"] = Model.Title;
+    var isOwner = ViewBag.IsOwner is bool b && b;
+
+    static bool IsHttp(string? value)
+    {
+        return Uri.TryCreate(value, UriKind.Absolute, out var uri) && (uri.Scheme == "http" || uri.Scheme == "https");
+    }
+
+    static string Period(int? start, int? end)
+    {
+        if (start.HasValue && end.HasValue) return start.Value + " — " + end.Value;
+        if (start.HasValue) return start.Value + " — по настоящее время";
+        if (end.HasValue) return "до " + end.Value;
+        return string.Empty;
+    }
+
+    var hasContacts = !string.IsNullOrWhiteSpace(Model.Telegram) || !string.IsNullOrWhiteSpace(Model.ContactEmail)
+        || !string.IsNullOrWhiteSpace(Model.Phone) || !string.IsNullOrWhiteSpace(Model.Facebook)
+        || !string.IsNullOrWhiteSpace(Model.LinkedIn);
+    var education = Model.Educations.Where(e => e.Kind == EducationKind.Education).ToList();
+    var courses = Model.Educations.Where(e => e.Kind == EducationKind.Course).ToList();
+}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-start">
+            <div>
+                <h2 class="mb-1">@Model.Title</h2>
+                <div class="text-muted">@Model.Category?.Name</div>
+                @if (Model.ExpectedSalary.HasValue)
+                {
+                    <div class="fs-5 mt-2">Ожидаемая зарплата: @Model.ExpectedSalary.Value.ToString("N0") ₽</div>
+                }
+                <div class="small text-muted mt-1">Обновлено: @Model.UpdatedAt.ToString("dd.MM.yyyy HH:mm")</div>
+            </div>
+            <div class="d-flex align-items-center mt-2">
+                <img src="@Model.Seeker?.AvatarUrl" class="avatar avatar-md me-3" alt="" />
+                <div>
+                    <div class="fw-bold">@Model.Seeker?.DisplayName</div>
+                    @if (!isOwner && User.IsInRole(Roles.Employer))
+                    {
+                        <a asp-controller="Profiles" asp-action="Seeker" asp-route-id="@Model.SeekerId">Профиль соискателя</a>
+                    }
+                </div>
+            </div>
+        </div>
+        @if (isOwner)
+        {
+            <hr />
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                @if (Model.IsPublished)
+                {
+                    <span class="badge bg-success">Опубликовано</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Не опубликовано</span>
+                }
+                <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@Model.Id">Редактировать</a>
+                <form asp-action="TogglePublish" asp-route-id="@Model.Id" asp-route-returnTo="details" method="post">
+                    <button type="submit" class="btn btn-sm @(Model.IsPublished ? "btn-outline-warning" : "btn-outline-success")">
+                        @(Model.IsPublished ? "Снять с публикации" : "Опубликовать")
+                    </button>
+                </form>
+                <a class="btn btn-sm btn-outline-secondary" asp-controller="Seeker" asp-action="Index">В кабинет</a>
+            </div>
+        }
+    </div>
+</div>
+
+@if (hasContacts)
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Контакты</div>
+        <ul class="list-group list-group-flush">
+            @if (!string.IsNullOrWhiteSpace(Model.Telegram))
+            {
+                <li class="list-group-item">Telegram: @Model.Telegram</li>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.ContactEmail))
+            {
+                <li class="list-group-item">Email: @Model.ContactEmail</li>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Phone))
+            {
+                <li class="list-group-item">Телефон: @Model.Phone</li>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Facebook))
+            {
+                <li class="list-group-item">
+                    Facebook:
+                    @if (IsHttp(Model.Facebook))
+                    {
+                        <a href="@Model.Facebook" target="_blank" rel="noopener noreferrer">@Model.Facebook</a>
+                    }
+                    else
+                    {
+                        @Model.Facebook
+                    }
+                </li>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.LinkedIn))
+            {
+                <li class="list-group-item">
+                    LinkedIn:
+                    @if (IsHttp(Model.LinkedIn))
+                    {
+                        <a href="@Model.LinkedIn" target="_blank" rel="noopener noreferrer">@Model.LinkedIn</a>
+                    }
+                    else
+                    {
+                        @Model.LinkedIn
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+@if (Model.WorkExperiences.Any())
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Опыт работы</div>
+        <ul class="list-group list-group-flush">
+            @foreach (var work in Model.WorkExperiences.OrderByDescending(w => w.YearFrom))
+            {
+                <li class="list-group-item">
+                    <div class="fw-bold">@work.Position — @work.CompanyName</div>
+                    <div class="text-muted small">@Period(work.YearFrom, work.YearTo)</div>
+                    @if (!string.IsNullOrWhiteSpace(work.Responsibilities))
+                    {
+                        <div class="pre-wrap mt-1">@work.Responsibilities</div>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+@if (education.Any())
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Образование</div>
+        <ul class="list-group list-group-flush">
+            @foreach (var item in education)
+            {
+                <li class="list-group-item">
+                    <div class="fw-bold">@item.Institution</div>
+                    @if (!string.IsNullOrWhiteSpace(item.Specialty))
+                    {
+                        <div>@item.Specialty</div>
+                    }
+                    @if (!string.IsNullOrEmpty(Period(item.YearFrom, item.YearTo)))
+                    {
+                        <div class="text-muted small">@Period(item.YearFrom, item.YearTo)</div>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+@if (courses.Any())
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Курсы повышения квалификации</div>
+        <ul class="list-group list-group-flush">
+            @foreach (var item in courses)
+            {
+                <li class="list-group-item">
+                    <div class="fw-bold">@item.Institution</div>
+                    @if (!string.IsNullOrWhiteSpace(item.Specialty))
+                    {
+                        <div>@item.Specialty</div>
+                    }
+                    @if (!string.IsNullOrEmpty(Period(item.YearFrom, item.YearTo)))
+                    {
+                        <div class="text-muted small">@Period(item.YearFrom, item.YearTo)</div>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+}

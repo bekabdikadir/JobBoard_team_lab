@@ -1,31 +1,21 @@
-html {
-  font-size: 14px;
+.avatar {
+    border-radius: 50%;
+    object-fit: cover;
+    background: #dee2e6;
 }
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+.avatar-sm { width: 32px; height: 32px; }
+.avatar-md { width: 64px; height: 64px; }
+.avatar-lg { width: 128px; height: 128px; }
+.pre-wrap { white-space: pre-wrap; word-break: break-word; }
+.chat-box {
+    max-height: 480px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    padding: 1rem;
 }
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
-}
-
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
-}
-
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
-}
+.chat-msg { max-width: 75%; margin-bottom: .75rem; padding: .5rem .75rem; border-radius: .75rem; }
+.chat-msg.mine { margin-left: auto; background: #cfe2ff; }
+.chat-msg.theirs { margin-right: auto; background: #e9ecef; }
+.chat-msg small { display: block; color: #6c757d; font-size: .75rem; }

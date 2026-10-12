@@ -1,0 +1,78 @@
+@model VacancyDetailsViewModel
+@{
+    var vacancy = Model.Vacancy;
+    ViewData["Title"] = vacancy.Title;
+    var isSeeker = User.IsInRole(Roles.Seeker);
+}
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-start">
+            <div>
+                <h2 class="mb-1">@vacancy.Title</h2>
+                <div class="text-muted">@vacancy.Category?.Name</div>
+                <div class="fs-5 mt-2">
+                    @(vacancy.Salary.HasValue ? vacancy.Salary.Value.ToString("N0") + " ₽" : "Зарплата не указана")
+                </div>
+                @if (vacancy.ExperienceFrom.HasValue || vacancy.ExperienceTo.HasValue)
+                {
+                    <div class="mt-1">
+                        Требуемый опыт:
+                        @(vacancy.ExperienceFrom.HasValue ? "от " + vacancy.ExperienceFrom + " " : "")@(vacancy.ExperienceTo.HasValue ? "до " + vacancy.ExperienceTo + " " : "")лет
+                    </div>
+                }
+                <div class="small text-muted mt-1">Опубликовано: @vacancy.UpdatedAt.ToString("dd.MM.yyyy")</div>
+            </div>
+            <div class="d-flex align-items-center mt-2">
+                <img src="@vacancy.Employer?.AvatarUrl" class="avatar avatar-md me-3" alt="" />
+                <div class="fw-bold">@vacancy.Employer?.DisplayName</div>
+            </div>
+        </div>
+        <hr />
+        <div class="pre-wrap">@vacancy.Description</div>
+        <hr />
+        <a class="btn btn-outline-secondary me-2" asp-action="Index">К списку вакансий</a>
+        @if (isSeeker)
+        {
+            if (Model.ExistingApplicationId.HasValue)
+            {
+                <a class="btn btn-success" asp-controller="Applications" asp-action="Chat" asp-route-id="@Model.ExistingApplicationId">Вы уже откликнулись — перейти к переписке</a>
+            }
+            else if (!Model.MyResumes.Any())
+            {
+                <a class="btn btn-primary" asp-controller="Resumes" asp-action="Create">Создайте резюме, чтобы откликнуться</a>
+            }
+            else
+            {
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#applyModal">Откликнуться</button>
+            }
+        }
+    </div>
+</div>
+
+@if (isSeeker && !Model.ExistingApplicationId.HasValue && Model.MyResumes.Any())
+{
+    <div class="modal fade" id="applyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form asp-controller="Applications" asp-action="Create" method="post" class="modal-content">
+                <input type="hidden" name="vacancyId" value="@vacancy.Id" />
+                <div class="modal-header">
+                    <h5 class="modal-title">Отклик на вакансию</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="resumeId" class="form-label">Выберите резюме</label>
+                    <select name="resumeId" id="resumeId" class="form-select" required>
+                        @foreach (var resume in Model.MyResumes)
+                        {
+                            <option value="@resume.Id">@resume.Title</option>
+                        }
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Откликнуться</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}

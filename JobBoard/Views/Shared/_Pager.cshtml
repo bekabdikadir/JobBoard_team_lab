@@ -1,0 +1,17 @@
+@model PagerModel
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            @for (var p = 1; p <= Model.TotalPages; p++)
+            {
+                var route = new RouteValueDictionary(
+                    Model.Route.Where(x => x.Value != null).ToDictionary(x => x.Key, x => (object?)x.Value));
+                route["page"] = p;
+                <li class="page-item @(p == Model.Page ? "active" : "")">
+                    <a class="page-link" href="@Url.Action(Model.Action, Model.Controller, route)">@p</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

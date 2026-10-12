@@ -1,0 +1,66 @@
+@model ResumeCatalogViewModel
+@{
+    ViewData["Title"] = "Каталог резюме";
+    var pager = new PagerModel
+    {
+        Page = Model.Page,
+        TotalPages = Model.TotalPages,
+        Action = "Catalog",
+        Controller = "Resumes"
+    };
+    pager.Route["categoryId"] = Model.CategoryId?.ToString();
+}
+<h3 class="mb-3">Каталог резюме</h3>
+
+<form method="get" asp-action="Catalog" class="row g-2 mb-4">
+    <div class="col-md-6 col-lg-4">
+        <select name="categoryId" class="form-select">
+            <option value="">Все категории</option>
+            @foreach (var category in Model.Categories)
+            {
+                <option value="@category.Id" selected="@(Model.CategoryId == category.Id)">@category.Name</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Применить</button>
+        <a class="btn btn-outline-secondary" asp-action="Catalog">Сбросить</a>
+    </div>
+</form>
+
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info">Опубликованных резюме не найдено.</div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var resume in Model.Items)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <img src="@resume.Seeker?.AvatarUrl" class="avatar avatar-md me-3" alt="" />
+                            <div>
+                                <div class="fw-bold">@resume.Seeker?.DisplayName</div>
+                                <a asp-controller="Profiles" asp-action="Seeker" asp-route-id="@resume.SeekerId" class="small">Профиль соискателя</a>
+                            </div>
+                        </div>
+                        <h5 class="card-title">
+                            <a asp-action="Details" asp-route-id="@resume.Id" class="text-decoration-none">@resume.Title</a>
+                        </h5>
+                        <div class="text-muted small">@resume.Category?.Name</div>
+                        @if (resume.ExpectedSalary.HasValue)
+                        {
+                            <div class="mt-1">Ожидания: @resume.ExpectedSalary.Value.ToString("N0") ₽</div>
+                        }
+                        <div class="small text-muted mt-1">Обновлено: @resume.UpdatedAt.ToString("dd.MM.yyyy")</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<partial name="_Pager" model="pager" />

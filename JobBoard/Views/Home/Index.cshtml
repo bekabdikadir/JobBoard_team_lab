@@ -1,8 +1,9 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Главная";
 }
-
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="p-5 mb-4 bg-white rounded-3 shadow-sm text-center">
+    <h1 class="display-5 fw-bold">Поиск работы и сотрудников</h1>
+    <p class="lead">Создавайте резюме, откликайтесь на вакансии и общайтесь с работодателями.</p>
+    <a class="btn btn-primary btn-lg me-2" asp-controller="Account" asp-action="Register">Регистрация</a>
+    <a class="btn btn-outline-primary btn-lg" asp-controller="Account" asp-action="Login">Войти</a>
 </div>

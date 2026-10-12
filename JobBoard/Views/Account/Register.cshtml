@@ -1,0 +1,67 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Регистрация";
+}
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="mb-3">Регистрация</h3>
+                <form asp-action="Register" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label d-block">Я регистрируюсь как</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="Role" id="roleSeeker" value="Seeker" checked="@(Model.Role == "Seeker")" />
+                            <label class="form-check-label" for="roleSeeker">Соискатель</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="Role" id="roleEmployer" value="Employer" checked="@(Model.Role == "Employer")" />
+                            <label class="form-check-label" for="roleEmployer">Работодатель</label>
+                        </div>
+                        <span asp-validation-for="Role" class="text-danger d-block"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" id="nameLabel" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" class="form-control" type="tel" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ConfirmPassword" class="form-label"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Photo" class="form-label"></label>
+                        <input asp-for="Photo" class="form-control" type="file" accept="image/*" />
+                        <div class="form-text">Необязательно. Если фото не загружено, будет использовано изображение по умолчанию.</div>
+                        <span asp-validation-for="Photo" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                </form>
+                <p class="mt-3 mb-0 text-center">Уже есть аккаунт? <a asp-action="Login">Войти</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/register.js" asp-append-version="true"></script>
+}

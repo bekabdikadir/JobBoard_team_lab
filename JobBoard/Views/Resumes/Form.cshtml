@@ -1,0 +1,136 @@
+@model ResumeFormViewModel
+@{
+    var isEdit = Model.Id.HasValue;
+    ViewData["Title"] = isEdit ? "Редактирование резюме" : "Новое резюме";
+}
+<h3 class="mb-3">@ViewData["Title"]</h3>
+
+<form asp-action="@(isEdit ? "Edit" : "Create")" asp-route-id="@Model.Id" method="post" id="resumeForm">
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Основная информация</div>
+        <div class="card-body row g-3">
+            <div class="col-md-6">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" required maxlength="200" />
+            </div>
+            <div class="col-md-3">
+                <label asp-for="CategoryId" class="form-label"></label>
+                <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select" required>
+                    <option value="">Выберите категорию</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="ExpectedSalary" class="form-label"></label>
+                <input asp-for="ExpectedSalary" class="form-control" type="number" min="0" step="1" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Контакты и социальные сети</div>
+        <div class="card-body row g-3">
+            <div class="col-md-4">
+                <label asp-for="Telegram" class="form-label"></label>
+                <input asp-for="Telegram" class="form-control" maxlength="100" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="ContactEmail" class="form-label"></label>
+                <input asp-for="ContactEmail" class="form-control" type="email" maxlength="150" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Phone" class="form-label"></label>
+                <input asp-for="Phone" class="form-control" type="tel" maxlength="50" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Facebook" class="form-label"></label>
+                <input asp-for="Facebook" class="form-control" maxlength="300" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="LinkedIn" class="form-label"></label>
+                <input asp-for="LinkedIn" class="form-control" maxlength="300" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Опыт работы</span>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="addWork">Добавить место работы</button>
+        </div>
+        <div class="card-body" id="workContainer">
+            @for (var i = 0; i < Model.WorkExperiences.Count; i++)
+            {
+                <div class="card card-body mb-2 module-row">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <input asp-for="WorkExperiences[i].CompanyName" class="form-control" placeholder="Название компании" required maxlength="200" />
+                        </div>
+                        <div class="col-md-6">
+                            <input asp-for="WorkExperiences[i].Position" class="form-control" placeholder="Должность" required maxlength="200" />
+                        </div>
+                        <div class="col-md-3">
+                            <input asp-for="WorkExperiences[i].YearFrom" class="form-control" type="number" min="1950" max="2100" placeholder="Год начала" required />
+                        </div>
+                        <div class="col-md-3">
+                            <input asp-for="WorkExperiences[i].YearTo" class="form-control" type="number" min="1950" max="2100" placeholder="Год окончания" />
+                        </div>
+                        <div class="col-12">
+                            <textarea asp-for="WorkExperiences[i].Responsibilities" class="form-control" rows="3" placeholder="Обязанности" maxlength="4000"></textarea>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-row">Удалить</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Образование и курсы</span>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="addEducation">Добавить образование или курс</button>
+        </div>
+        <div class="card-body" id="educationContainer">
+            @for (var i = 0; i < Model.Educations.Count; i++)
+            {
+                <div class="card card-body mb-2 module-row">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <select asp-for="Educations[i].Kind" class="form-select">
+                                <option value="Education">Образование</option>
+                                <option value="Course">Курсы повышения квалификации</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <input asp-for="Educations[i].Institution" class="form-control" placeholder="Учебное заведение / организатор курсов" required maxlength="250" />
+                        </div>
+                        <div class="col-md-6">
+                            <input asp-for="Educations[i].Specialty" class="form-control" placeholder="Специальность / название курса" maxlength="250" />
+                        </div>
+                        <div class="col-md-3">
+                            <input asp-for="Educations[i].YearFrom" class="form-control" type="number" min="1950" max="2100" placeholder="Год начала" />
+                        </div>
+                        <div class="col-md-3">
+                            <input asp-for="Educations[i].YearTo" class="form-control" type="number" min="1950" max="2100" placeholder="Год окончания" />
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-row">Удалить</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a class="btn btn-outline-secondary" asp-controller="Seeker" asp-action="Index">Отмена</a>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/js/resume-form.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,66 @@
+@model VacancyListViewModel
+@{
+    ViewData["Title"] = "Вакансии";
+    var pager = new PagerModel
+    {
+        Page = Model.Page,
+        TotalPages = Model.TotalPages,
+        Action = "Index",
+        Controller = "Vacancies"
+    };
+    pager.Route["q"] = Model.Query;
+    pager.Route["categoryId"] = Model.CategoryId?.ToString();
+    pager.Route["sort"] = Model.Sort;
+}
+<h3 class="mb-3">Вакансии</h3>
+
+<form method="get" asp-action="Index" class="row g-2 mb-4">
+    <div class="col-md-4">
+        <input type="text" name="q" value="@Model.Query" class="form-control" placeholder="Поиск по названию" />
+    </div>
+    <div class="col-md-3">
+        <select name="categoryId" class="form-select">
+            <option value="">Все категории</option>
+            @foreach (var category in Model.Categories)
+            {
+                <option value="@category.Id" selected="@(Model.CategoryId == category.Id)">@category.Name</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="sort" class="form-select">
+            <option value="new" selected="@(Model.Sort == "new")">Сначала новые</option>
+            <option value="salary_desc" selected="@(Model.Sort == "salary_desc")">Зарплата по убыванию</option>
+            <option value="salary_asc" selected="@(Model.Sort == "salary_asc")">Зарплата по возрастанию</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Найти</button>
+    </div>
+</form>
+
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info">Вакансии не найдены.</div>
+}
+else
+{
+    foreach (var vacancy in Model.Items)
+    {
+        <a asp-action="Details" asp-route-id="@vacancy.Id" class="card shadow-sm mb-3 text-decoration-none text-body">
+            <div class="card-body">
+                <div class="d-flex flex-wrap justify-content-between">
+                    <h5 class="card-title mb-1">@vacancy.Title</h5>
+                    <span class="fw-bold">
+                        @(vacancy.Salary.HasValue ? vacancy.Salary.Value.ToString("N0") + " ₽" : "Зарплата не указана")
+                    </span>
+                </div>
+                <div class="text-muted small">@vacancy.Category?.Name</div>
+                <div class="small mt-1">Компания: @vacancy.Employer?.DisplayName</div>
+                <div class="small text-muted">Опубликовано: @vacancy.UpdatedAt.ToString("dd.MM.yyyy")</div>
+            </div>
+        </a>
+    }
+}
+
+<partial name="_Pager" model="pager" />

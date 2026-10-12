@@ -1,0 +1,39 @@
+@model List<JobApplication>
+@{
+    ViewData["Title"] = "Мои отклики";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Мои отклики</h3>
+    <a class="btn btn-outline-secondary" asp-action="Index">В кабинет</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Вы ещё не откликались на вакансии.</div>
+}
+else
+{
+    <div class="list-group shadow-sm">
+        @foreach (var app in Model)
+        {
+            var last = app.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault();
+            <div class="list-group-item">
+                <div class="d-flex flex-wrap justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">
+                            <a asp-controller="Vacancies" asp-action="Details" asp-route-id="@app.VacancyId" class="text-decoration-none">@app.Vacancy?.Title</a>
+                        </h5>
+                        <div class="text-muted small">Компания: @app.Vacancy?.Employer?.DisplayName</div>
+                        <div class="small">Резюме: @app.Resume?.Title</div>
+                        <div class="small">Отклик отправлен: @app.CreatedAt.ToString("dd.MM.yyyy HH:mm")</div>
+                        @if (last != null)
+                        {
+                            <div class="small text-muted mt-1">Последнее сообщение (@last.SentAt.ToString("dd.MM.yyyy HH:mm")): @(last.Text.Length > 80 ? last.Text.Substring(0, 80) + "…" : last.Text)</div>
+                        }
+                    </div>
+                    <a class="btn btn-primary" asp-controller="Applications" asp-action="Chat" asp-route-id="@app.Id">Перейти к переписке</a>
+                </div>
+            </div>
+        }
+    </div>
+}
