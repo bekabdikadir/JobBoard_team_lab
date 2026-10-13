@@ -118,6 +118,21 @@ public class ApplicationsController : Controller
         return View(model);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Messages(int id)
+    {
+        var userId = _users.GetUserId(User)!;
+        var application = await LoadParticipantApplication(id, userId);
+        if (application == null) return NotFound();
+        var model = new ChatViewModel
+        {
+            Application = application, CurrentUserId = userId, IsSeeker = application.SeekerId == userId,
+            Messages = await _db.ChatMessages.Include(m => m.Sender).Where(m => m.JobApplicationId == id)
+                .OrderBy(m => m.SentAt).ThenBy(m => m.Id).ToListAsync()
+        };
+        return PartialView("_Messages", model);
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SendMessage(int id, string? text)
@@ -150,6 +165,7 @@ public class ApplicationsController : Controller
             SentAt = DateTime.UtcNow
         });
         await _db.SaveChangesAsync();
+        if (Request.Headers.XRequestedWith == "XMLHttpRequest") return Json(new { success = true });
         return RedirectToAction(nameof(Chat), new { id });
     }
 
