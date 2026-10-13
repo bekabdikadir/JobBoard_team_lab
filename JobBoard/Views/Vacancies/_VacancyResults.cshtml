@@ -1,0 +1,30 @@
+@model VacancyListViewModel
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info">Вакансии не найдены.</div>
+}
+else
+{
+    foreach (var vacancy in Model.Items)
+    {
+        <a asp-action="Details" asp-route-id="@vacancy.Id" class="card shadow-sm mb-3 text-decoration-none text-body vacancy-card">
+            <div class="card-body">
+                <div class="d-flex flex-wrap justify-content-between">
+                    <h5 class="card-title mb-1">@vacancy.Title</h5>
+                    <span class="fw-bold">@(vacancy.Salary.HasValue ? vacancy.Salary.Value.ToString("N0") + " ₽" : "Зарплата не указана")</span>
+                </div>
+                <div class="text-muted small">@vacancy.Category?.Name</div>
+                <div class="small mt-1">Компания: @vacancy.Employer?.DisplayName</div>
+                <div class="small text-muted">Опубликовано: @vacancy.UpdatedAt.ToString("dd.MM.yyyy")</div>
+            </div>
+        </a>
+    }
+}
+<nav aria-label="Навигация по вакансиям">
+    <ul class="pagination justify-content-center">
+        @for (var page = 1; page <= Model.TotalPages; page++)
+        {
+            <li class="page-item @(page == Model.Page ? "active" : "")"><button class="page-link" type="button" data-page="@page">@page</button></li>
+        }
+    </ul>
+</nav>
