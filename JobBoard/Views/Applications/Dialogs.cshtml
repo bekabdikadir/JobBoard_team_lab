@@ -1,0 +1,16 @@
+@model IReadOnlyList<JobApplication>
+@{ ViewData["Title"] = "Диалоги"; }
+<h2 class="mb-1">Диалоги</h2><p class="text-muted mb-4">Переписка по вакансиям и откликам</p>
+@if (!Model.Any()) { <div class="alert alert-info">У вас пока нет диалогов.</div> }
+<div class="list-group shadow-sm">
+@foreach (var item in Model)
+{
+    var isSeeker = item.SeekerId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var person = isSeeker ? item.Vacancy?.Employer?.DisplayName : item.Seeker?.DisplayName;
+    var last = item.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault();
+    <a class="list-group-item list-group-item-action p-3" asp-action="Chat" asp-route-id="@item.Id">
+        <div class="d-flex justify-content-between gap-3"><strong>@item.Vacancy?.Title</strong><small>@((last?.SentAt ?? item.CreatedAt).ToString("dd.MM.yyyy HH:mm"))</small></div>
+        <div class="small text-muted">@person · @(last?.Text ?? "Диалог создан, сообщений пока нет")</div>
+    </a>
+}
+</div>

@@ -29,22 +29,9 @@
     </div>
 </div>
 
-<div class="chat-box mb-3" id="chatBox">
-    @if (!Model.Messages.Any())
-    {
-        <div class="text-muted text-center">Сообщений пока нет. Напишите первое сообщение.</div>
-    }
-    @foreach (var message in Model.Messages)
-    {
-        var mine = message.SenderId == Model.CurrentUserId;
-        <div class="chat-msg @(mine ? "mine" : "theirs")">
-            <small>@(mine ? "Вы" : message.Sender?.DisplayName) · @message.SentAt.ToString("dd.MM.yyyy HH:mm")</small>
-            <div class="pre-wrap">@message.Text</div>
-        </div>
-    }
-</div>
+<div class="chat-box mb-3" id="chatBox" data-messages-url="@Url.Action("Messages", new { id = application.Id })"><partial name="_Messages" model="Model" /></div>
 
-<form asp-action="SendMessage" asp-route-id="@application.Id" method="post">
+<form asp-action="SendMessage" asp-route-id="@application.Id" method="post" id="chatForm">
     <div class="input-group">
         <textarea name="text" class="form-control" rows="2" maxlength="4000" placeholder="Введите сообщение" required></textarea>
         <button type="submit" class="btn btn-primary">Отправить</button>
@@ -52,10 +39,5 @@
 </form>
 
 @section Scripts {
-    <script>
-        $(function () {
-            var box = document.getElementById('chatBox');
-            box.scrollTop = box.scrollHeight;
-        });
-    </script>
+    <script src="~/js/application-chat.js" asp-append-version="true"></script>
 }

@@ -23,6 +23,19 @@ public class VacanciesController : Controller
 
     public async Task<IActionResult> Index(string? q, int? categoryId, string sort = "new", int page = 1)
     {
+        var model = await BuildListModel(q, categoryId, sort, page);
+        return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Search(string? q, int? categoryId, string sort = "new", int page = 1)
+    {
+        var model = await BuildListModel(q, categoryId, sort, page);
+        return PartialView("_VacancyResults", model);
+    }
+
+    private async Task<VacancyListViewModel> BuildListModel(string? q, int? categoryId, string sort, int page)
+    {
         var query = _db.Vacancies
             .Include(v => v.Category)
             .Include(v => v.Employer)
@@ -60,7 +73,7 @@ public class VacanciesController : Controller
             Page = page,
             TotalPages = totalPages
         };
-        return View(model);
+        return model;
     }
 
     public async Task<IActionResult> Details(int id)

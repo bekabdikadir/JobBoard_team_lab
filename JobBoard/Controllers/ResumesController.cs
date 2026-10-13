@@ -200,6 +200,12 @@ public class ResumesController : Controller
         }
 
         ViewBag.IsOwner = isOwner;
+        if (User.IsInRole(Roles.Employer))
+        {
+            var employerId = _users.GetUserId(User)!;
+            ViewBag.EmployerVacancies = await _db.Vacancies.Where(v => v.EmployerId == employerId && v.IsPublished)
+                .OrderByDescending(v => v.UpdatedAt).ToListAsync();
+        }
         return View(resume);
     }
 

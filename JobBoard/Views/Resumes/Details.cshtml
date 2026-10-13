@@ -21,6 +21,7 @@
         || !string.IsNullOrWhiteSpace(Model.LinkedIn);
     var education = Model.Educations.Where(e => e.Kind == EducationKind.Education).ToList();
     var courses = Model.Educations.Where(e => e.Kind == EducationKind.Course).ToList();
+    var employerVacancies = ViewBag.EmployerVacancies as List<Vacancy> ?? new();
 }
 
 <div class="card shadow-sm mb-4">
@@ -69,6 +70,23 @@
         }
     </div>
 </div>
+
+@if (!isOwner && User.IsInRole(Roles.Employer))
+{
+    if (employerVacancies.Any())
+    {
+        <button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#startChatModal">Обсудить вакансию</button>
+        <div class="modal fade" id="startChatModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog">
+            <form asp-controller="Applications" asp-action="StartEmployerConversation" method="post" class="modal-content">
+                <input type="hidden" name="resumeId" value="@Model.Id" />
+                <div class="modal-header"><h5 class="modal-title">Начать диалог с соискателем</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body"><label class="form-label" for="vacancyId">Выберите вакансию для обсуждения</label><select class="form-select" id="vacancyId" name="vacancyId" required>@foreach (var vacancy in employerVacancies) { <option value="@vacancy.Id">@vacancy.Title</option> }</select></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button><button type="submit" class="btn btn-primary">Открыть чат</button></div>
+            </form>
+        </div></div>
+    }
+    else { <div class="alert alert-info mb-4">Опубликуйте вакансию, чтобы начать диалог с соискателем.</div> }
+}
 
 @if (hasContacts)
 {

@@ -27,11 +27,14 @@
                     <li class="nav-item"><a class="nav-link" asp-controller="Seeker" asp-action="Index">Мой кабинет</a></li>
                     <li class="nav-item"><a class="nav-link" asp-controller="Vacancies" asp-action="Index">Вакансии</a></li>
                     <li class="nav-item"><a class="nav-link" asp-controller="Seeker" asp-action="Applications">Мои отклики</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Applications" asp-action="Dialogs">Диалоги</a></li>
                 }
                 @if (isEmployer)
                 {
                     <li class="nav-item"><a class="nav-link" asp-controller="Resumes" asp-action="Catalog">Каталог резюме</a></li>
                     <li class="nav-item"><a class="nav-link" asp-controller="Vacancies" asp-action="Index">Вакансии</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Applications" asp-action="Employer">Отклики</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Applications" asp-action="Dialogs">Диалоги</a></li>
                 }
             </ul>
             <ul class="navbar-nav align-items-center">

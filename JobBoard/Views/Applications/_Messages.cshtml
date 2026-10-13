@@ -1,0 +1,13 @@
+@model ChatViewModel
+@if (!Model.Messages.Any())
+{
+    <div class="text-muted text-center">Сообщений пока нет. Напишите первое сообщение.</div>
+}
+@foreach (var message in Model.Messages)
+{
+    var mine = message.SenderId == Model.CurrentUserId;
+    <div class="chat-msg @(mine ? "mine" : "theirs")" data-message-id="@message.Id">
+        <small>@(mine ? "Вы" : message.Sender?.DisplayName) · @message.SentAt.ToString("dd.MM.yyyy HH:mm")</small>
+        <div class="pre-wrap">@message.Text</div>
+    </div>
+}

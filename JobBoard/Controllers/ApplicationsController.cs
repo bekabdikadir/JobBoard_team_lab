@@ -21,6 +21,37 @@ public class ApplicationsController : Controller
         _users = users;
     }
 
+    [Authorize(Roles = Roles.Employer)]
+    [HttpGet]
+    public async Task<IActionResult> Employer(int? vacancyId)
+    {
+        var employerId = _users.GetUserId(User)!;
+        var vacancies = await _db.Vacancies.Where(v => v.EmployerId == employerId)
+            .OrderByDescending(v => v.UpdatedAt).ToListAsync();
+        var query = _db.JobApplications
+            .Include(a => a.Vacancy).Include(a => a.Resume).Include(a => a.Seeker).Include(a => a.Messages)
+            .Where(a => a.Vacancy!.EmployerId == employerId);
+        if (vacancyId.HasValue) query = query.Where(a => a.VacancyId == vacancyId.Value);
+        return View(new EmployerApplicationsViewModel
+        {
+            Applications = await query.OrderByDescending(a => a.CreatedAt).ToListAsync(),
+            Vacancies = vacancies,
+            VacancyId = vacancyId
+        });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Dialogs()
+    {
+        var userId = _users.GetUserId(User)!;
+        var query = _db.JobApplications
+            .Include(a => a.Vacancy).ThenInclude(v => v!.Employer)
+            .Include(a => a.Seeker).Include(a => a.Resume).Include(a => a.Messages)
+            .Where(a => a.SeekerId == userId || a.Vacancy!.EmployerId == userId);
+        var dialogs = await query.OrderByDescending(a => a.Messages.Max(m => (DateTime?)m.SentAt) ?? a.CreatedAt).ToListAsync();
+        return View(dialogs);
+    }
+
     [Authorize(Roles = Roles.Seeker)]
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -62,6 +93,24 @@ public class ApplicationsController : Controller
         return RedirectToAction(nameof(Chat), new { id = application.Id });
     }
 
+    [Authorize(Roles = Roles.Employer)]
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> StartEmployerConversation(int vacancyId, int resumeId)
+    {
+        var employerId = _users.GetUserId(User)!;
+        var vacancy = await _db.Vacancies.FirstOrDefaultAsync(v => v.Id == vacancyId && v.EmployerId == employerId);
+        var resume = await _db.Resumes.FirstOrDefaultAsync(r => r.Id == resumeId && r.IsPublished);
+        if (vacancy == null || resume == null) return NotFound();
+        var application = await _db.JobApplications.FirstOrDefaultAsync(a => a.VacancyId == vacancyId && a.SeekerId == resume.SeekerId);
+        if (application == null)
+        {
+            application = new JobApplication { VacancyId = vacancyId, ResumeId = resumeId, SeekerId = resume.SeekerId, CreatedAt = DateTime.UtcNow };
+            _db.JobApplications.Add(application);
+            await _db.SaveChangesAsync();
+        }
+        return RedirectToAction(nameof(Chat), new { id = application.Id });
+    }
+
     [HttpGet]
     public async Task<IActionResult> Chat(int id)
     {
@@ -85,6 +134,21 @@ public class ApplicationsController : Controller
                 .ToListAsync()
         };
         return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Messages(int id)
+    {
+        var userId = _users.GetUserId(User)!;
+        var application = await LoadParticipantApplication(id, userId);
+        if (application == null) return NotFound();
+        var model = new ChatViewModel
+        {
+            Application = application, CurrentUserId = userId, IsSeeker = application.SeekerId == userId,
+            Messages = await _db.ChatMessages.Include(m => m.Sender).Where(m => m.JobApplicationId == id)
+                .OrderBy(m => m.SentAt).ThenBy(m => m.Id).ToListAsync()
+        };
+        return PartialView("_Messages", model);
     }
 
     [HttpPost]
@@ -119,6 +183,7 @@ public class ApplicationsController : Controller
             SentAt = DateTime.UtcNow
         });
         await _db.SaveChangesAsync();
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") return Json(new { success = true });
         return RedirectToAction(nameof(Chat), new { id });
     }
 
