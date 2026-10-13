@@ -1,0 +1,25 @@
+@model EmployerApplicationsViewModel
+@{ ViewData["Title"] = "Отклики соискателей"; }
+<div class="d-flex flex-wrap justify-content-between align-items-end mb-4">
+    <div><h2 class="mb-1">Отклики соискателей</h2><p class="text-muted mb-0">Только отклики на вакансии вашей компании</p></div>
+    <form method="get" class="d-flex gap-2">
+        <select name="vacancyId" class="form-select" onchange="this.form.submit()">
+            <option value="">Все вакансии</option>
+            @foreach (var vacancy in Model.Vacancies) { <option value="@vacancy.Id" selected="@(Model.VacancyId == vacancy.Id)">@vacancy.Title</option> }
+        </select>
+    </form>
+</div>
+@if (!Model.Applications.Any()) { <div class="alert alert-info">Откликов пока нет.</div> }
+@foreach (var application in Model.Applications)
+{
+    <article class="card shadow-sm mb-3"><div class="card-body">
+        <div class="d-flex justify-content-between gap-3 flex-wrap"><div>
+            <h5 class="mb-1">@application.Vacancy?.Title</h5>
+            <a asp-controller="Profiles" asp-action="Seeker" asp-route-id="@application.SeekerId">@application.Seeker?.DisplayName</a>
+            <div class="small text-muted">Отклик от @application.CreatedAt.ToString("dd.MM.yyyy HH:mm") · сообщений: @application.Messages.Count</div>
+        </div><div class="d-flex gap-2 align-items-center">
+            <a class="btn btn-outline-primary" asp-controller="Resumes" asp-action="Details" asp-route-id="@application.ResumeId">Резюме</a>
+            <a class="btn btn-primary" asp-action="Chat" asp-route-id="@application.Id">Открыть чат</a>
+        </div></div>
+    </div></article>
+}

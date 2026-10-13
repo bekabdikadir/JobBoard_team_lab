@@ -21,6 +21,25 @@ public class ApplicationsController : Controller
         _users = users;
     }
 
+    [Authorize(Roles = Roles.Employer)]
+    [HttpGet]
+    public async Task<IActionResult> Employer(int? vacancyId)
+    {
+        var employerId = _users.GetUserId(User)!;
+        var vacancies = await _db.Vacancies.Where(v => v.EmployerId == employerId)
+            .OrderByDescending(v => v.UpdatedAt).ToListAsync();
+        var query = _db.JobApplications
+            .Include(a => a.Vacancy).Include(a => a.Resume).Include(a => a.Seeker).Include(a => a.Messages)
+            .Where(a => a.Vacancy!.EmployerId == employerId);
+        if (vacancyId.HasValue) query = query.Where(a => a.VacancyId == vacancyId.Value);
+        return View(new EmployerApplicationsViewModel
+        {
+            Applications = await query.OrderByDescending(a => a.CreatedAt).ToListAsync(),
+            Vacancies = vacancies,
+            VacancyId = vacancyId
+        });
+    }
+
     [Authorize(Roles = Roles.Seeker)]
     [HttpPost]
     [ValidateAntiForgeryToken]

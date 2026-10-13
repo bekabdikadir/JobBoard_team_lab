@@ -142,3 +142,10 @@ public class ChatViewModel
     public string CurrentUserId { get; set; } = string.Empty;
     public bool IsSeeker { get; set; }
 }
+
+public class EmployerApplicationsViewModel
+{
+    public List<JobApplication> Applications { get; set; } = new();
+    public List<Vacancy> Vacancies { get; set; } = new();
+    public int? VacancyId { get; set; }
+}
