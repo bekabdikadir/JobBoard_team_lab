@@ -93,6 +93,24 @@ public class ApplicationsController : Controller
         return RedirectToAction(nameof(Chat), new { id = application.Id });
     }
 
+    [Authorize(Roles = Roles.Employer)]
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> StartEmployerConversation(int vacancyId, int resumeId)
+    {
+        var employerId = _users.GetUserId(User)!;
+        var vacancy = await _db.Vacancies.FirstOrDefaultAsync(v => v.Id == vacancyId && v.EmployerId == employerId);
+        var resume = await _db.Resumes.FirstOrDefaultAsync(r => r.Id == resumeId && r.IsPublished);
+        if (vacancy == null || resume == null) return NotFound();
+        var application = await _db.JobApplications.FirstOrDefaultAsync(a => a.VacancyId == vacancyId && a.SeekerId == resume.SeekerId);
+        if (application == null)
+        {
+            application = new JobApplication { VacancyId = vacancyId, ResumeId = resumeId, SeekerId = resume.SeekerId, CreatedAt = DateTime.UtcNow };
+            _db.JobApplications.Add(application);
+            await _db.SaveChangesAsync();
+        }
+        return RedirectToAction(nameof(Chat), new { id = application.Id });
+    }
+
     [HttpGet]
     public async Task<IActionResult> Chat(int id)
     {
