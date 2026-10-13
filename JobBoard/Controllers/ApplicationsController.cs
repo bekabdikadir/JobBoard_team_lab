@@ -40,6 +40,18 @@ public class ApplicationsController : Controller
         });
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Dialogs()
+    {
+        var userId = _users.GetUserId(User)!;
+        var query = _db.JobApplications
+            .Include(a => a.Vacancy).ThenInclude(v => v!.Employer)
+            .Include(a => a.Seeker).Include(a => a.Resume).Include(a => a.Messages)
+            .Where(a => a.SeekerId == userId || a.Vacancy!.EmployerId == userId);
+        var dialogs = await query.OrderByDescending(a => a.Messages.Max(m => (DateTime?)m.SentAt) ?? a.CreatedAt).ToListAsync();
+        return View(dialogs);
+    }
+
     [Authorize(Roles = Roles.Seeker)]
     [HttpPost]
     [ValidateAntiForgeryToken]
