@@ -183,7 +183,7 @@ public class ApplicationsController : Controller
             SentAt = DateTime.UtcNow
         });
         await _db.SaveChangesAsync();
-        if (Request.Headers.XRequestedWith == "XMLHttpRequest") return Json(new { success = true });
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") return Json(new { success = true });
         return RedirectToAction(nameof(Chat), new { id });
     }
 
