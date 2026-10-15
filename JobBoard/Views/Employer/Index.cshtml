@@ -1,0 +1,110 @@
+﻿@model EmployerCabinetViewModel
+@{
+    ViewData["Title"] = "Кабинет компании";
+}
+<div class="card shadow-sm mb-4">
+    <div class="card-body d-flex flex-wrap align-items-center">
+        <img src="@Model.User.AvatarUrl" class="avatar avatar-lg me-4" alt="Логотип компании" />
+        <div class="flex-grow-1">
+            <h3 class="mb-1">@Model.User.DisplayName</h3>
+            <div class="text-muted">Email: @Model.User.Email</div>
+            <div class="text-muted">Телефон: @Model.User.PhoneNumber</div>
+        </div>
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">Редактировать профиль</button>
+    </div>
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a class="btn btn-outline-secondary" asp-controller="Resumes" asp-action="Catalog">Каталог резюме</a>
+    <a class="btn btn-outline-secondary" asp-controller="Vacancies" asp-action="Index">Все вакансии</a>
+    <a class="btn btn-outline-secondary" asp-controller="Applications" asp-action="Employer">Отклики</a>
+    <a class="btn btn-outline-secondary" asp-controller="Applications" asp-action="Dialogs">Диалоги</a>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Мои вакансии</h4>
+    <a class="btn btn-primary" asp-controller="Vacancies" asp-action="Create">Создать вакансию</a>
+</div>
+
+@if (!Model.Vacancies.Any())
+{
+    <div class="alert alert-info">У вас пока нет вакансий</div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var vacancy in Model.Vacancies)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a asp-controller="Vacancies" asp-action="Details" asp-route-id="@vacancy.Id" class="text-decoration-none">@vacancy.Title</a>
+                        </h5>
+                        <div class="text-muted small mb-2">@vacancy.Category?.Name</div>
+                        <div class="small mb-2">Обновлено: @vacancy.UpdatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                        @if (vacancy.IsPublished)
+                        {
+                            <span class="badge bg-success">Опубликовано</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Не опубликовано</span>
+                        }
+                    </div>
+                    <div class="card-footer bg-white d-flex flex-wrap gap-2">
+                        <a class="btn btn-sm btn-outline-primary" asp-controller="Vacancies" asp-action="Edit" asp-route-id="@vacancy.Id">Редактировать</a>
+                        <form asp-controller="Vacancies" asp-action="Refresh" asp-route-id="@vacancy.Id" method="post">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Обновить</button>
+                        </form>
+                        <form asp-controller="Vacancies" asp-action="TogglePublish" asp-route-id="@vacancy.Id" method="post">
+                            <button type="submit" class="btn btn-sm @(vacancy.IsPublished ? "btn-outline-warning" : "btn-outline-success")">
+                                @(vacancy.IsPublished ? "Снять с публикации" : "Опубликовать")
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-action="EditProfile" method="post" enctype="multipart/form-data" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактирование профиля компании</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="editName" class="form-label">Название компании</label>
+                    <input id="editName" name="Name" value="@Model.Edit.Name" class="form-control" required maxlength="150" />
+                </div>
+                <div class="mb-3">
+                    <label for="editEmail" class="form-label">Email</label>
+                    <input id="editEmail" name="Email" value="@Model.Edit.Email" class="form-control" type="email" required />
+                </div>
+                <div class="mb-3">
+                    <label for="editPhone" class="form-label">Номер телефона</label>
+                    <input id="editPhone" name="Phone" value="@Model.Edit.Phone" class="form-control" type="tel" required />
+                </div>
+                <div class="mb-3">
+                    <label for="editPhoto" class="form-label">Логотип компании</label>
+                    <input id="editPhoto" name="Photo" class="form-control" type="file" accept="image/*" />
+                </div>
+                @if (!string.IsNullOrEmpty(Model.User.PhotoPath))
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="RemovePhoto" id="removePhoto" value="true" />
+                        <label class="form-check-label" for="removePhoto">Удалить текущий логотип</label>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>

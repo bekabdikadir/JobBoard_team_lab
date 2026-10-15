@@ -136,7 +136,7 @@ public class AccountController : Controller
     private IActionResult RedirectToRoleHome(string role)
     {
         return role == Roles.Employer
-            ? RedirectToAction("Catalog", "Resumes")
+            ? RedirectToAction("Index", "Employer")
             : RedirectToAction("Index", "Seeker");
     }
 }

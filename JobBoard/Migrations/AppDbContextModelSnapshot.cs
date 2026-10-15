@@ -312,6 +312,10 @@ namespace JobBoard.Migrations
                     b.Property<bool>("IsPublished")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Requirements")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
                     b.Property<decimal?>("Salary")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");

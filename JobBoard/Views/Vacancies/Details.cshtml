@@ -3,6 +3,11 @@
     var vacancy = Model.Vacancy;
     ViewData["Title"] = vacancy.Title;
     var isSeeker = User.IsInRole(Roles.Seeker);
+    var isOwner = ViewBag.IsOwner == true;
+}
+@if (isOwner && !vacancy.IsPublished)
+{
+    <div class="alert alert-warning">Вакансия не опубликована</div>
 }
 <div class="card shadow-sm mb-4">
     <div class="card-body">
@@ -29,8 +34,22 @@
         </div>
         <hr />
         <div class="pre-wrap">@vacancy.Description</div>
+        @if (!string.IsNullOrWhiteSpace(vacancy.Requirements))
+        {
+            <h5 class="mt-4">Требования</h5>
+            <div class="pre-wrap">@vacancy.Requirements</div>
+        }
         <hr />
         <a class="btn btn-outline-secondary me-2" asp-action="Index">К списку вакансий</a>
+        @if (isOwner)
+        {
+            <a class="btn btn-outline-primary me-2" asp-action="Edit" asp-route-id="@vacancy.Id">Редактировать</a>
+            <form asp-action="TogglePublish" asp-route-id="@vacancy.Id" asp-route-returnTo="details" method="post" class="d-inline">
+                <button type="submit" class="btn @(vacancy.IsPublished ? "btn-outline-warning" : "btn-outline-success")">
+                    @(vacancy.IsPublished ? "Снять с публикации" : "Опубликовать")
+                </button>
+            </form>
+        }
         @if (isSeeker)
         {
             if (Model.ExistingApplicationId.HasValue)

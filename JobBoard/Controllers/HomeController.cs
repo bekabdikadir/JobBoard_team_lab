@@ -11,7 +11,7 @@ public class HomeController : Controller
         {
             if (User.IsInRole(Roles.Employer))
             {
-                return RedirectToAction("Catalog", "Resumes");
+               return RedirectToAction("Index", "Employer");
             }
             return RedirectToAction("Index", "Seeker");
         }

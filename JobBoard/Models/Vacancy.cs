@@ -10,6 +10,8 @@ public class Vacancy
     public string Title { get; set; } = string.Empty;
 
     public decimal? Salary { get; set; }
+    [MaxLength(4000)]
+    public string? Requirements { get; set; }
 
     [Required]
     public string Description { get; set; } = string.Empty;
